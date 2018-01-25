@@ -4,6 +4,8 @@ import os
 import pyDes
 import swiftclient.client as swiftclient
 import flask
+import keystoneclient.v3 as keystoneclient
+
 
 PORT = int(os.getenv('PORT', 80))
 app = flask.Flask(__name__)
