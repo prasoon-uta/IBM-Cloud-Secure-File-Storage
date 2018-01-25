@@ -1,15 +1,9 @@
 
 import os
-import json
+
 import pyDes
-
-from flask import Flask, render_template, request, make_response
 import swiftclient.client as swiftclient
-
-
-import keystoneclient.v3 as keystoneclient
-
-
+from flask import Flask, render_template, request, make_response
 
 PORT = int(os.getenv('PORT', 80))
 app = Flask(__name__)

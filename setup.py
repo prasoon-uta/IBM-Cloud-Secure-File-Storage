@@ -17,5 +17,5 @@ setup(
     description='Cryptographic storage using IBM Cloud and python flask',
     long_description=long_description,
     url='https://github.com/prasoon-uta/IBM-coud-storage',
-    license='Apache-2.0'
+    license='Apache-2.0', install_requires=['pyDes', 'python-swiftclient']
 )
