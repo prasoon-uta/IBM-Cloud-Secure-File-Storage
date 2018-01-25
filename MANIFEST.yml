@@ -1,0 +1,6 @@
+---
+ applications:
+ - name: your-app
+   memory: 256M
+   disk_quota: 1024M
+   buildpack: python_buildpack
