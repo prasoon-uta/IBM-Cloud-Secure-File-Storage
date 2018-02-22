@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/Cloud storage.iml" filepath="$PROJECT_DIR$/.idea/Cloud storage.iml" />
+      <module fileurl="file://$USER_HOME$/Desktop/aws-ec2-s3-master/aws-ec2-s3-master/.idea/aws-ec2-s3-master.iml" filepath="$USER_HOME$/Desktop/aws-ec2-s3-master/aws-ec2-s3-master/.idea/aws-ec2-s3-master.iml" />
     </modules>
   </component>
 </project>

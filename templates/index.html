@@ -1,88 +1,108 @@
 
 <!DOCTYPE html>
 <body>
-<h2 align="center">Prasoon kumar (1001415936)</h2>
+<h3 align="center">Prasoon kumar (1001415936)</h3>
 
 <hr>
 <h4>Create container</h4>
-<form action="/createcontiner" method="POST"  >
-    <input type="text" id="containername" name="containername"/>
-    <input type="submit" name="createcontainer" value="createcontainer" />
+<form action="/createnewcont" method="POST"  >
+    <input type="text" id="contname" name="contname"/>
+    <input type="submit" name="createcont" value="createcont" />
+    <div>{{msgcon}}</div>
     <br>
 </form>
 
 <hr>
 <h4>Display Containers</h4>
-<form action="/displaycontainers" method="post" >
+<form action="/displaycons" method="post" >
 <input type="submit" name="getcontianers" id="getcontianers" value="Display container">
 <ul>
-        {% for container in container_list %}
-        <li>{{ container }}</li>
+        {% for obj in lists %}
+        <li>{{ obj }}</li>
         {% endfor %}
 </ul>
 </form>
 
 <hr>
 <h4>Delete Container</h4>
-<form action="/deletecontainer" method="post" >
-    <input type="text" name="getdeletecontainer" id="getdeletecontainer" />
+<form action="/deletecont" method="post" >
+    <input type="text" name="delcont" id="delcont" />
     <input type="submit"  id="delcontainer" name="delcontainer" value="Delete Container" />
+    <div>{{msgdelete}}</div>
 </form>
 
 <hr>
 <h4>Uploading a File </h4>
-<form  action="/upload_file" method="POST" enctype="multipart/form-data"><br>
+<form  action="/fileupload" method="POST" enctype="multipart/form-data"><br>
 
-       <input type="text" id="uploadcontainername" name="uploadcontainername" value="Containername"/><br>
+       <input type="text" id="uploadnamecont" name="uploadnamecont" value="Containername"/><br>
          <input type = "file" name = "file" />
          <br>
+
+    <div style="color:#0000FF">{{msg}}</div>
          <input type = "submit" name=="upload" value="UPLOAD"/>
 
 </form>
 
 <hr>
-<form action="/download_file" method="POST"  >
+<form action="/filedownload" method="POST"  >
         <h4>Downloading file from container name:</h4>
-        <input type="text" id="downloadcontainername" name="downloadcontainername" value="Containername"/>
-        <p>File name: </p><input type="text" id="downloadingfile" name="downloadingfile">
+        <input type="text" id="paramcname" name="paramcname" value="Containername"/>
+        <p>File name: </p><input type="text" id="paramfile" name="paramfile">
          <br>
          <input type="submit" name="download" value="DOWNLOAD" />
          <br>
 </form>
 
 <hr>
-<h4>Displaying files</h4>
-<form action="displaydata" method="post">
-    <input type="text" id="containnmae" name="containnmae" />
-    <input type="text" id="objecname" name="objecname" />
+<h4>Display files</h4>
+<form action="displayfiledata" method="post">
+    <input type="text" id="cname" name="cname" />
+    <input type="text" id="fname" name="fname" />
     <input type="submit" id="getdata" name="getdata" value="Display Content" />
-    <ul>
-        {{file_contents}}
+    <ul >
+        {{contents}}
 
     </ul>
 </form>
 
 <hr>
-    <h4>Listing files in a container</h4>
-<form action="listfiles" method="post">
+    <h4>List files  in a container</h4>
+<form action="displayfilesincontainer" method="post">
 
-    <input type="text" name="conname" id="conname" value="Containername"/>
+    <input type="text" name="containername" id="containername" value="Containername"/>
     <input type="submit" id="dispalyfiles" name="displayfiles">
     <ul>
-        {% for obj in object_list %}
-        <li>{{ obj }}</li>
+        {% for file in files_list %}
+        <li>{{ file }}</li>
         {% endfor %}
     </ul>
 </form>
 
 <hr>
 <h4>Delete objects</h4>
-<form action="deleteobjects" method="post">
-   <p>Container name:</p> <input type="text" name="deleteconater" id="deleteconater" >
-   <p>Object name:</p> <input type="text" name="objname" id="objname" >
+<form action="deleteobjectsofcontainer" method="post">
+   <p>Container name:</p> <input type="text" name="deleteconatername" id="deleteconatername" >
+   <p>Object name:</p> <input type="text" name="objectname" id="objectname" >
     <input type="submit" name="delobj" id="delobj" value="Delete Object">
 </form>
 
 <hr>
+
+<hr>
+<h4> Delete files with less than TimeStamp</h4>
+<form action="/deletefiles" method="post"  >
+
+        <input type="text" id="deltefilecon" name="deltefilecon" value="Containername"/>
+        <p>Enter Date(): </p><input type="text" id="filedate" name="filedate">
+         <br>
+         <input type="submit" name="deletefiles" value="DeleteFiles" />
+         <br>
+        <ul>
+        {% for obj in deletedfiles %}
+        <li>{{ obj }}</li>
+        {% endfor %}
+    </ul>
+</form>
 
 </body>

@@ -1,9 +1,12 @@
 
 import os
-
+import sys
 import pyDes
 import swiftclient.client as swiftclient
 import flask
+import datetime
+import os
+
 import keystoneclient.v3 as keystoneclient
 
 
@@ -11,27 +14,11 @@ PORT = int(os.getenv('PORT', 80))
 app = flask.Flask(__name__)
 app.debug=True
 
-"""
-if 'VCAP_SERVICES' in os.environ:
-    cred = json.loads(os.environ['VCAP_SERVICES'])['Object-Storage'][0]
-    credinfo=cred['credentials']
-    authurl = credinfo['https://identity.open.softlayer.com'] + '/v3'
-    projectId = credinfo['8929e7a3ba4847c0adbd4c134349f1a5']
-    region = credinfo['dallas']
-    userId = credinfo['19654912304a4110a0cf487a3acb47bd']
-    password = credinfo['Zf*7PTJY.!_7KkC=']
-    projectname = credinfo['object_storage_de149da8_17ae_417a_b6ea_f6ac635ad442']
-    domainName = credinfo['b2f10d5c0a624363ae567ba18493b408']
-    conn = swiftclient.Connection(key=password, authurl=authurl, auth_version='3',
-                                  os_options={"project_id": projectId, "user_id": userId, "region_name": region})
-
-"""
-
-password = 'Zf*7PTJY.!_7KkC='
-authurl = 'https://identity.open.softlayer.com'
-projectId = '8929e7a3ba4847c0adbd4c134349f1a5'
-userId = '19654912304a4110a0cf487a3acb47bd'
-region = 'dallas'
+password = ''
+authurl = ''
+projectId = ''
+userId = ''
+region = ''
 
 
 conn = swiftclient.Connection(
@@ -49,38 +36,58 @@ def root():
     return flask.render_template("index.html")
 
 
-@app.route('/createcontiner',methods=['GET','POST'])
-def createcontainer():
-    container_name =flask.request.form['containername']
+@app.route('/createnewcont',methods=['GET','POST'])
+def createnewcont():
+    container_name =flask.request.form['contname']
     conn.put_container(container_name)
-    return flask.render_template("index.html")
+    return flask.render_template("index.html",msgcon="container" +" " +container_name +" created successfully")
 
-@app.route('/displaycontainers',methods=["GET",'POST'])
-def displaycontainers():
-    container_list=[]
+@app.route('/displaycons',methods=["GET",'POST'])
+def displaycons():
+    list=[]
     for container in conn.get_account()[1]:
-        container_list.append(container['name'])
-    return flask.render_template("index.html", container_list=container_list)
+        list.append(container['name'])
+    return flask.render_template("index.html", lists=list)
 
-@app.route('/deletecontainer',methods=["GET",'POST'])
-def deletecontainers():
-    container_name=flask.request.form['getdeletecontainer']
-    conn.delete_container(container_name)
-    return flask.render_template("index.html")
 
-@app.route('/upload_file',methods=['GET','POST'])
-def upload():
+@app.route('/deletecont',methods=["GET",'POST'])
+def deletecont():
+    name=flask.request.form['delcont']
+    conn.delete_container(name)
+    return flask.render_template("index.html",msgdelete = "Container "+name+" deleted successfully")
+
+@app.route('/fileupload',methods=['GET','POST'])
+def file_upload():
 
     if flask.request.method== 'POST':
-        container_name=flask.request.form['uploadcontainername']
+        container_name=flask.request.form['uploadnamecont']
         f=flask.request.files['file']
+
+        blob = flask.request.files['file'].read()
+        size = len(blob)
+
+
         data = f.stream.read()
+
+
+        if size >10 :
+            container_name ="big"
+        if size <=10:
+            container_name = "small"
+
         conn.put_object(container_name,
                         f.filename,
                         contents=encod(data,'qweasdzx'),
                         content_type='text/plain')
 
-        return flask.render_template("index.html", msg="File uploaded suceesfully")
+
+
+        totalfilesize = 0
+        for data in conn.get_container(container_name)[1]:
+                totalfilesize  += data['bytes']
+
+        return flask.render_template("index.html",msg="File uploaded suceesfully , Total size on cloud is " + str(totalfilesize))
+
 
 def encod(data, password):
     k = pyDes.des(password, pyDes.CBC, "\0\0\0\0\0\0\0\0", pad=None, padmode=pyDes.PAD_PKCS5)
@@ -95,10 +102,10 @@ def decod(data, password):
 
 
 
-@app.route('/download_file',methods=['GET','POST'])
-def download():
-        container_name=flask.request.form['downloadcontainername']
-        filenme=flask.request.form['downloadingfile']
+@app.route('/filedownload',methods=['GET','POST'])
+def file_download():
+        container_name=flask.request.form['paramcname']
+        filenme=flask.request.form['paramfile']
         obj = conn.get_object(container_name, filenme)
         file_contents = obj[1]
         actual_file=decod(file_contents,'qweasdzx')
@@ -109,31 +116,69 @@ def download():
             return response
 
 
-@app.route('/displaydata',methods=['GET','POST'])
-def displayingdata():
-    container_name = flask.request.form['containnmae']
-    object_name=flask.request.form['objecname']
-    data=conn.get_object(container_name,object_name)
-    file_contents=data[1]
-    return flask.render_template("index.html", file_contents=file_contents)
+@app.route('/displayfiledata',methods=['GET','POST'])
+def displayfiledata():
+    container_name = flask.request.form['cname']
+    object_name=flask.request.form['fname']
+    flag = None
+
+    if container_name == '':
+        return flask.render_template("index.html", contents="enter a container name")
 
 
-@app.route('/listfiles',methods=['GET','POST'])
-def displayfilesfromcontainer():
-    container_name=flask.request.form['conname']
-    object_list=[]
+    if object_name == '':
+        return flask.render_template("index.html", contents="enter a file name")
+
     for data in conn.get_container(container_name)[1]:
-        object_list.append(data['name'])
-        object_list.append(data['bytes'])
-        object_list.append(data['last_modified'])
-    return flask.render_template("index.html", object_list=object_list)
+        if data['name'] ==object_name:
+            flag =True
+            break;
 
-@app.route("/deleteobjects",methods=['GET','POST'])
-def deleteobjects():
-    container_name=flask.request.form['deleteconater']
-    obj_name=flask.request.form['objname']
+
+    if flag is None:
+        return flask.render_template("index.html", contents="file not on cloud")
+
+    data = conn.get_object(container_name, object_name)
+    file_contents = data[1]
+    actual_file = decod(file_contents, 'qweasdzx')
+    return flask.render_template("index.html", contents=actual_file)
+
+
+@app.route('/displayfilesincontainer',methods=['GET','POST'])
+def displaycontainerfiles():
+    container_name=flask.request.form['containername']
+    list=[]
+    for data in conn.get_container(container_name)[1]:
+        list.append(data['name'])
+        list.append(data['bytes'])
+        list.append(data['last_modified'])
+    return flask.render_template("index.html", files_list=list)
+
+@app.route("/deleteobjectsofcontainer",methods=['GET','POST'])
+def deleteobjectsofcontainer():
+    container_name=flask.request.form['deleteconatername']
+    obj_name=flask.request.form['objectname']
     conn.delete_object(container_name, obj_name)
     return flask.render_template("index.html")
+
+
+
+@app.route('/deletefiles',methods=['GET','POST'])
+def deletefilesofcontainer():
+    container_name=flask.request.form['deltefilecon']
+    filedate = datetime.datetime.strptime(flask.request.form['filedate'], "%Y-%m-%dT%H:%M:%S.%f")
+
+    list = []
+
+    for data in conn.get_container(container_name)[1]:
+        if datetime.datetime.strptime(data['last_modified'],"%Y-%m-%dT%H:%M:%S.%f") < filedate:
+            list.append(data['name'])
+            conn.delete_object(container_name, data['name'])
+
+    return flask.render_template("index.html", deletedfiles=list)
+
+
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(PORT), threaded=True, debug=False)
